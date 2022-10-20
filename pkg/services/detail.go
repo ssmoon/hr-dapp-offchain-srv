@@ -40,9 +40,9 @@ func CreateCareer(career *models.WorkerCareer) {
 	db.Create(&career)
 }
 
-func FinishCareer(careerId uint32) {
+func FinishCareer(careerId uint32, endAt time.Time) {
 	db := conf.Db
-	db.Model(&models.WorkerCareer{}).Where("id = ?", careerId).Update("has_ended", 1)
+	db.Model(&models.WorkerCareer{}).Where("id = ?", careerId).Updates(map[string]any{"has_ended": 1, "end_at": endAt})
 }
 
 func ValidateOnChain(workerId uint32) vo.WorkerDetail {

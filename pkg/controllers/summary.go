@@ -12,7 +12,7 @@ type WorkerSummary struct {
 }
 
 func (controller *WorkerSummary) GetWorkerSummary(context *gin.Context) {
-
+	context.JSON(http.StatusOK, services.GetAllWorkers())
 }
 
 func (controller *WorkerSummary) CreateWorker(context *gin.Context) {

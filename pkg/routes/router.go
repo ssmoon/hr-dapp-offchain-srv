@@ -11,20 +11,21 @@ var Router *gin.Engine
 func InitializeRoutes(r *gin.Engine) {
 	var worker = r.Group("/api/worker")
 	{
-		con := &controllers.WorkerSummary{}
-		worker.POST("/", con.CreateWorker)
-		worker.GET("/all", con.GetWorkerSummary)
+		con1 := &controllers.WorkerSummary{}
+		con2 := &controllers.WorkerDetail{}
+		worker.POST("/", con1.CreateWorker)
+		worker.GET("/all", con1.GetWorkerSummary)
+		worker.GET("/:workerId", con2.GetWorkerDetail)
 	}
 	var cert = r.Group("/api/certificate")
 	{
-		con := &controllers.WorkerSummary{}
-		cert.POST("/", con.CreateWorker)
-		cert.GET("/all", con.GetWorkerSummary)
+		con := &controllers.WorkerDetail{}
+		cert.POST("/", con.CreateCertificate)
 	}
 	var career = r.Group("/api/career")
 	{
-		con := &controllers.WorkerSummary{}
-		career.POST("/", con.CreateWorker)
-		career.GET("/all", con.GetWorkerSummary)
+		con := &controllers.WorkerDetail{}
+		career.POST("/new", con.CreateCareer)
+		career.PUT("/:careerId/finish", con.FinishCareer)
 	}
 }
