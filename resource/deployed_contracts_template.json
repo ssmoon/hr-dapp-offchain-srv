@@ -1,0 +1,10 @@
+{
+    "ownerAddr": "",
+    "proxyedAddr": {
+        "proxy": "",
+        "admin": "",
+        "implementation": ""
+    },
+    "network": "",
+    "updated": ""
+}

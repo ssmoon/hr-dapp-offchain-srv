@@ -12,7 +12,7 @@ func GetAllWorkers() []models.Worker {
 	db.Find(&workers)
 
 	for _, v := range workers {
-		v.SecurityNo = fmt.Sprintf("%s********%s", v.SecurityNo[0:6], v.SecurityNo[14:18])
+		v.SecurityNo = fmt.Sprint(v.SecurityNo[0:6], "********", v.SecurityNo[14:18])
 	}
 
 	return workers
