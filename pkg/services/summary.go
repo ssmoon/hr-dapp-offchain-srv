@@ -26,17 +26,18 @@ func GetAllWorkers() []models.Worker {
 	return workers
 }
 
-func CreateWorker(worker *models.Worker) {
+func CreateWorker(worker *models.Worker) error {
 	db := conf.Db
 	db.Create(&worker)
 
 	var collegeByCode *models.College
 	result := db.First(&collegeByCode, worker.CollegeID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprint("college not found with id ", string(worker.CollegeID)))
+		return fmt.Errorf(fmt.Sprint("college not found with id ", string(worker.CollegeID)))
 	}
 
-	_createOnChainWorker(worker, collegeByCode.CollegeCode)
+	err := _createOnChainWorker(worker, collegeByCode.CollegeCode)
+	return err
 }
 
 func SyncOnChain(workerId uint32) uint8 {
@@ -84,7 +85,7 @@ func SyncOnChain(workerId uint32) uint8 {
 	}
 }
 
-func _createOnChainWorker(offChainWorker *models.Worker, collegeCode string) {
+func _createOnChainWorker(offChainWorker *models.Worker, collegeCode string) error {
 	facade := conf.GetFacadeContract()
 	worker := contracts.WorkerDefineWorker{}
 
@@ -97,7 +98,5 @@ func _createOnChainWorker(offChainWorker *models.Worker, collegeCode string) {
 
 	manifestJson, _ := json.MarshalIndent(tx, "", "    ")
 	log.Println(string(manifestJson))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }

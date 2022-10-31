@@ -34,7 +34,7 @@ func GetWorkerDetail(workerId uint32) vo.WorkerDetail {
 	return workerDetail
 }
 
-func CreateCertificate(workerId uint32, certificateId uint32, acquiredAt time.Time) {
+func CreateCertificate(workerId uint32, certificateId uint32, acquiredAt time.Time) error {
 	db := conf.Db
 	workerCert := &models.WorkerCert{}
 	workerCert.CertificateID = certificateId
@@ -45,23 +45,23 @@ func CreateCertificate(workerId uint32, certificateId uint32, acquiredAt time.Ti
 	var cert *models.Certificate
 	result := db.First(&cert, certificateId)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprint("cert not found with id ", certificateId))
+		return fmt.Errorf("cert not found with id %d", certificateId)
 	}
 
-	_createOnChainCertficate(getSecurityNoByWorkerId(workerId), cert.CertCode, uint16(acquiredAt.Year()))
+	return _createOnChainCertficate(getSecurityNoByWorkerId(workerId), cert.CertCode, uint16(acquiredAt.Year()))
 }
 
-func CreateCareer(career *models.WorkerCareer) {
+func CreateCareer(career *models.WorkerCareer) error {
 	db := conf.Db
 	db.Create(&career)
 
 	var company *models.Company
 	result := db.First(&company, career.CompanyID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprint("Company not found with id ", career.CompanyID))
+		return fmt.Errorf("company not found with id %d", career.CompanyID)
 	}
 
-	_createOnChainCareer(
+	return _createOnChainCareer(
 		getSecurityNoByWorkerId(uint32(career.WorkerID)),
 		company.CompanyCode,
 		uint16(career.StartAt.Year()),
@@ -94,7 +94,7 @@ func getSecurityNoByWorkerId(workerId uint32) string {
 	return worker.SecurityNo
 }
 
-func ValidateOnChain(workerId uint32) *vo.ValidateResult {
+func ValidateOnChain(workerId uint32) (*vo.ValidateResult, error) {
 	vaidateResult := &vo.ValidateResult{}
 
 	facade := conf.GetFacadeContract()
@@ -104,15 +104,15 @@ func ValidateOnChain(workerId uint32) *vo.ValidateResult {
 	callOpts := conf.GetCallOpts(conf.GetCurrentUserAddr())
 	onChainWorker, e1 := facade.GetWorkerBySecurityNo(callOpts, securityNo)
 	if e1 != nil {
-		panic(e1)
+		return nil, e1
 	}
 	onChainCerts, e2 := facade.GetCertificateBySecurityNo(callOpts, securityNo)
 	if e2 != nil {
-		panic(e2)
+		return nil, e2
 	}
 	onChainCareers, e3 := facade.GetWorkExperienceBySecurityNo(callOpts, securityNo)
 	if e3 != nil {
-		panic(e3)
+		return nil, e3
 	}
 
 	db := conf.Db
@@ -120,13 +120,13 @@ func ValidateOnChain(workerId uint32) *vo.ValidateResult {
 	var offChainWorker *models.Worker
 	result := db.First(&offChainWorker, workerId)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprintf("worker not found with id %d", workerId))
+		return nil, fmt.Errorf("worker not found with id %d", workerId)
 	}
 
 	var college *models.College
 	result = db.First(&college, offChainWorker.CollegeID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprint("college not found with id ", string(offChainWorker.CollegeID)))
+		return nil, fmt.Errorf("college not found with id %d", offChainWorker.CollegeID)
 	}
 
 	onChainWorkerHash := conf.ComputeWorkerHash(onChainWorker.BirthAt, onChainWorker.GraduatedAt, string(onChainWorker.CollegeCode[:]))
@@ -189,20 +189,18 @@ func ValidateOnChain(workerId uint32) *vo.ValidateResult {
 		vaidateResult.CertificateSame = consts.Sync_Result_NotSame
 	}
 
-	return vaidateResult
+	return vaidateResult, nil
 }
 
-func _finishCareerOnChain(securityNo string, endAt uint16) {
+func _finishCareerOnChain(securityNo string, endAt uint16) error {
 	facade := conf.GetFacadeContract()
 	tx, err := facade.FinishLastCareer(conf.GetTransactionOpts(conf.GetCurrentUserKey(), conf.GetCurrentUserAddr()), conf.Sha3StringToByte32(securityNo), endAt)
 	manifestJson, _ := json.MarshalIndent(tx, "", "    ")
 	log.Println(string(manifestJson))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
-func _createOnChainCertficate(securityNo string, certCode string, acquiredAt uint16) {
+func _createOnChainCertficate(securityNo string, certCode string, acquiredAt uint16) error {
 	facade := conf.GetFacadeContract()
 
 	cert := contracts.CertificateDefineCertificate{}
@@ -213,12 +211,10 @@ func _createOnChainCertficate(securityNo string, certCode string, acquiredAt uin
 
 	manifestJson, _ := json.MarshalIndent(tx, "", "    ")
 	log.Println(string(manifestJson))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
 
-func _createOnChainCareer(securityNo string, companyCode string, startAt uint16, endAt uint16, hasEnded bool) {
+func _createOnChainCareer(securityNo string, companyCode string, startAt uint16, endAt uint16, hasEnded bool) error {
 	facade := conf.GetFacadeContract()
 
 	career := contracts.WorkExperienceDefineWorkExperience{}
@@ -231,7 +227,5 @@ func _createOnChainCareer(securityNo string, companyCode string, startAt uint16,
 
 	manifestJson, _ := json.MarshalIndent(tx, "", "    ")
 	log.Println(string(manifestJson))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
