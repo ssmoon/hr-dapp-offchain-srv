@@ -10,6 +10,7 @@ import (
 	models "hr-dapp/srv/pkg/models/db"
 	"log"
 
+	"github.com/golang-module/carbon/v2"
 	"gorm.io/gorm"
 )
 
@@ -28,6 +29,14 @@ func GetAllWorkers() []models.Worker {
 func CreateWorker(worker *models.Worker) {
 	db := conf.Db
 	db.Create(&worker)
+
+	var collegeByCode *models.College
+	result := db.First(&collegeByCode, worker.CollegeID)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		panic(fmt.Sprint("college not found with id ", string(worker.CollegeID)))
+	}
+
+	_createOnChainWorker(worker, collegeByCode.CollegeCode)
 }
 
 func SyncOnChain(workerId uint32) uint8 {
@@ -37,7 +46,7 @@ func SyncOnChain(workerId uint32) uint8 {
 	db := conf.Db
 	result := db.First(&offChainWorker, workerId)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprint("worker not found with id ", string(workerId)))
+		panic(fmt.Sprintf("worker not found with id %d", workerId))
 	}
 
 	var college *models.College
@@ -58,20 +67,24 @@ func SyncOnChain(workerId uint32) uint8 {
 		if onChainHash == offChainHash {
 			return consts.Sync_Result_Same
 		} else {
-			result = db.First(&college, offChainWorker.CollegeID)
+			var collegeByCode *models.College
+			result = db.First(&collegeByCode, offChainWorker.CollegeID)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				panic(fmt.Sprint("college not found with id ", string(offChainWorker.CollegeID)))
 			}
-			db.Updates()
+			offChainWorker.BirthAt = carbon.Time2Carbon(offChainWorker.BirthAt).SetYear(int(onChainWorker.BirthAt)).Carbon2Time()
+			offChainWorker.GraduatedAt = carbon.Time2Carbon(offChainWorker.GraduatedAt).SetYear(int(onChainWorker.GraduatedAt)).Carbon2Time()
+			offChainWorker.CollegeID = int32(collegeByCode.ID)
+			db.Save(offChainWorker)
+			return consts.Sync_Result_OverrideOffChain
 		}
 	} else {
-		createWorker(offChainWorker, college.CollegeCode)
+		_createOnChainWorker(offChainWorker, college.CollegeCode)
 		return consts.Sync_Result_UploadToChain
 	}
-
 }
 
-func createWorker(offChainWorker *models.Worker, collegeCode string) {
+func _createOnChainWorker(offChainWorker *models.Worker, collegeCode string) {
 	facade := conf.GetFacadeContract()
 	worker := contracts.WorkerDefineWorker{}
 

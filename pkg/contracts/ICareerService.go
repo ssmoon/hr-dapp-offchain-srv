@@ -28,10 +28,9 @@ var (
 	_ = event.NewSubscription
 )
 
-
 // ICareerServiceMetaData contains all meta data concerning the ICareerService contract.
 var ICareerServiceMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"startAt\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"endAt\",\"type\":\"uint16\"},{\"internalType\":\"bool\",\"name\":\"hasEnded\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"companyCode\",\"type\":\"bytes32\"}],\"internalType\":\"structWorkExperienceDefine.WorkExperience\",\"name\":\"workExperience\",\"type\":\"tuple\"}],\"name\":\"addWorkExperience\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"endYear\",\"type\":\"uint16\"}],\"name\":\"finishLastCareer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"}],\"name\":\"getWorkExperienceBySecurityNo\",\"outputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"startAt\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"endAt\",\"type\":\"uint16\"},{\"internalType\":\"bool\",\"name\":\"hasEnded\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"companyCode\",\"type\":\"bytes32\"}],\"internalType\":\"structWorkExperienceDefine.WorkExperience[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"},{\"components\":[{\"internalType\":\"uint16\",\"name\":\"startAt\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"endAt\",\"type\":\"uint16\"},{\"internalType\":\"bool\",\"name\":\"hasEnded\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"companyCode\",\"type\":\"bytes32\"}],\"internalType\":\"structWorkExperienceDefine.WorkExperience\",\"name\":\"workExperience\",\"type\":\"tuple\"}],\"name\":\"addWorkExperience\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"},{\"internalType\":\"uint16\",\"name\":\"endYear\",\"type\":\"uint16\"}],\"name\":\"finishLastCareer\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"securityNo\",\"type\":\"bytes32\"}],\"name\":\"getWorkExperienceBySecurityNo\",\"outputs\":[{\"components\":[{\"internalType\":\"uint16\",\"name\":\"startAt\",\"type\":\"uint16\"},{\"internalType\":\"uint16\",\"name\":\"endAt\",\"type\":\"uint16\"},{\"internalType\":\"bool\",\"name\":\"hasEnded\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"companyCode\",\"type\":\"bytes32\"}],\"internalType\":\"structWorkExperienceDefine.WorkExperience[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // ICareerServiceABI is the input ABI used to generate the binding from.
@@ -180,6 +179,37 @@ func (_ICareerService *ICareerServiceTransactorRaw) Transact(opts *bind.Transact
 	return _ICareerService.Contract.contract.Transact(opts, method, params...)
 }
 
+// GetWorkExperienceBySecurityNo is a free data retrieval call binding the contract method 0xabaed258.
+//
+// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) view returns((uint16,uint16,bool,bytes32)[])
+func (_ICareerService *ICareerServiceCaller) GetWorkExperienceBySecurityNo(opts *bind.CallOpts, securityNo [32]byte) ([]WorkExperienceDefineWorkExperience, error) {
+	var out []interface{}
+	err := _ICareerService.contract.Call(opts, &out, "getWorkExperienceBySecurityNo", securityNo)
+
+	if err != nil {
+		return *new([]WorkExperienceDefineWorkExperience), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([]WorkExperienceDefineWorkExperience)).(*[]WorkExperienceDefineWorkExperience)
+
+	return out0, err
+
+}
+
+// GetWorkExperienceBySecurityNo is a free data retrieval call binding the contract method 0xabaed258.
+//
+// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) view returns((uint16,uint16,bool,bytes32)[])
+func (_ICareerService *ICareerServiceSession) GetWorkExperienceBySecurityNo(securityNo [32]byte) ([]WorkExperienceDefineWorkExperience, error) {
+	return _ICareerService.Contract.GetWorkExperienceBySecurityNo(&_ICareerService.CallOpts, securityNo)
+}
+
+// GetWorkExperienceBySecurityNo is a free data retrieval call binding the contract method 0xabaed258.
+//
+// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) view returns((uint16,uint16,bool,bytes32)[])
+func (_ICareerService *ICareerServiceCallerSession) GetWorkExperienceBySecurityNo(securityNo [32]byte) ([]WorkExperienceDefineWorkExperience, error) {
+	return _ICareerService.Contract.GetWorkExperienceBySecurityNo(&_ICareerService.CallOpts, securityNo)
+}
+
 // AddWorkExperience is a paid mutator transaction binding the contract method 0x36efe55e.
 //
 // Solidity: function addWorkExperience(bytes32 securityNo, (uint16,uint16,bool,bytes32) workExperience) returns()
@@ -220,25 +250,4 @@ func (_ICareerService *ICareerServiceSession) FinishLastCareer(securityNo [32]by
 // Solidity: function finishLastCareer(bytes32 securityNo, uint16 endYear) returns()
 func (_ICareerService *ICareerServiceTransactorSession) FinishLastCareer(securityNo [32]byte, endYear uint16) (*types.Transaction, error) {
 	return _ICareerService.Contract.FinishLastCareer(&_ICareerService.TransactOpts, securityNo, endYear)
-}
-
-// GetWorkExperienceBySecurityNo is a paid mutator transaction binding the contract method 0xabaed258.
-//
-// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) returns((uint16,uint16,bool,bytes32)[])
-func (_ICareerService *ICareerServiceTransactor) GetWorkExperienceBySecurityNo(opts *bind.TransactOpts, securityNo [32]byte) (*types.Transaction, error) {
-	return _ICareerService.contract.Transact(opts, "getWorkExperienceBySecurityNo", securityNo)
-}
-
-// GetWorkExperienceBySecurityNo is a paid mutator transaction binding the contract method 0xabaed258.
-//
-// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) returns((uint16,uint16,bool,bytes32)[])
-func (_ICareerService *ICareerServiceSession) GetWorkExperienceBySecurityNo(securityNo [32]byte) (*types.Transaction, error) {
-	return _ICareerService.Contract.GetWorkExperienceBySecurityNo(&_ICareerService.TransactOpts, securityNo)
-}
-
-// GetWorkExperienceBySecurityNo is a paid mutator transaction binding the contract method 0xabaed258.
-//
-// Solidity: function getWorkExperienceBySecurityNo(bytes32 securityNo) returns((uint16,uint16,bool,bytes32)[])
-func (_ICareerService *ICareerServiceTransactorSession) GetWorkExperienceBySecurityNo(securityNo [32]byte) (*types.Transaction, error) {
-	return _ICareerService.Contract.GetWorkExperienceBySecurityNo(&_ICareerService.TransactOpts, securityNo)
 }

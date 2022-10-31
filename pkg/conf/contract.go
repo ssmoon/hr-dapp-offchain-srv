@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"hr-dapp/srv/pkg/contracts"
 	"log"
 	"math/big"
@@ -141,13 +142,62 @@ func Sha3StringToByte32(str string) [32]byte {
 func ComputeWorkerHash(birthAt uint16, graduatedAt uint16, collegeCode string) string {
 	hash := solsha3.SoliditySHA3(
 		// types
-		[]string{"uint16", "uint16", "string"},
+		[]string{"uint16[]", "uint16[]", "string[]"},
 
 		// values
 		[]interface{}{
 			birthAt,
 			graduatedAt,
 			collegeCode,
+		},
+	)
+	return hex.EncodeToString(hash)
+}
+
+func ComputeCareerHash(careers []contracts.WorkExperienceDefineWorkExperience) string {
+	size := len(careers)
+	startAtVals := make([]uint16, size)
+	endAtVals := make([]uint16, size)
+	companyCodeVals := make([]string, size)
+
+	for index, v := range careers {
+		startAtVals[index] = v.StartAt
+		endAtVals[index] = v.EndAt
+		companyCodeVals[index] = fmt.Sprintf("%x", v.CompanyCode)
+	}
+
+	hash := solsha3.SoliditySHA3(
+		// types
+		[]string{"uint16[]", "uint16[]", "bytes32"},
+
+		// values
+		[]any{
+			startAtVals,
+			endAtVals,
+			companyCodeVals,
+		},
+	)
+	return hex.EncodeToString(hash)
+}
+
+func ComputeCertHash(certs []contracts.CertificateDefineCertificate) string {
+	size := len(certs)
+	acquiredAtVals := make([]uint16, size)
+	certCodeVals := make([]string, size)
+
+	for index, v := range certs {
+		acquiredAtVals[index] = v.AcquiredAt
+		certCodeVals[index] = fmt.Sprintf("%x", v.AcquiredAt)
+	}
+
+	hash := solsha3.SoliditySHA3(
+		// types
+		[]string{"uint16[]", "bytes32"},
+
+		// values
+		[]any{
+			acquiredAtVals,
+			certCodeVals,
 		},
 	)
 	return hex.EncodeToString(hash)
