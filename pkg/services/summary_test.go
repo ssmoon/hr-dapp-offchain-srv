@@ -30,9 +30,12 @@ func TestCreateWorker(t *testing.T) {
 		newWorkerId = worker.ID
 	})
 	t.Run("worker should be both on db & chain", func(t *testing.T) {
-		syncResult := services.SyncOnChain(newWorkerId)
+		syncResult, err := services.SyncOnChain(newWorkerId)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
 		if syncResult != consts.Sync_Result_Same {
-			t.Error("Sync Result differs from [same], but %d", syncResult)
+			t.Errorf("Sync Result differs from [same], but %d", syncResult)
 		}
 	})
 	t.Run("should get worker list from db", func(t *testing.T) {
@@ -44,7 +47,7 @@ func TestCreateWorker(t *testing.T) {
 			}
 		}
 		if !exist {
-			t.Error("newly appended worker does not exist, worker id: %d", newWorkerId)
+			t.Errorf("newly appended worker does not exist, worker id: %d", newWorkerId)
 		}
 	})
 }

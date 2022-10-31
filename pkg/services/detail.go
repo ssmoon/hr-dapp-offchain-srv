@@ -69,19 +69,19 @@ func CreateCareer(career *models.WorkerCareer) error {
 		career.HasEnded == 1)
 }
 
-func FinishCareer(careerId uint32, endAt time.Time) {
+func FinishCareer(careerId uint32, endAt time.Time) error {
 	db := conf.Db
 	var career *models.WorkerCareer
 	result := db.First(&career, careerId)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		panic(fmt.Sprintf("career not found with id %d", careerId))
+		return fmt.Errorf("career not found with id %d", careerId)
 	}
 	if career.HasEnded == 0 {
-		panic(fmt.Sprintf("career with id: %d has ended already", careerId))
+		return fmt.Errorf("career with id: %d has ended already", careerId)
 	}
 	db.Model(&models.WorkerCareer{}).Where("id = ?", careerId).Updates(map[string]any{"has_ended": 1, "end_at": endAt})
 
-	_finishCareerOnChain(getSecurityNoByWorkerId(uint32(career.WorkerID)), uint16(endAt.Year()))
+	return _finishCareerOnChain(getSecurityNoByWorkerId(uint32(career.WorkerID)), uint16(endAt.Year()))
 }
 
 func getSecurityNoByWorkerId(workerId uint32) string {

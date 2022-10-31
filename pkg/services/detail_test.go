@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"hr-dapp/srv/pkg/consts"
 	models "hr-dapp/srv/pkg/models/db"
 	services "hr-dapp/srv/pkg/services"
 	"log"
@@ -10,47 +11,72 @@ import (
 )
 
 var worker *models.Worker
+var lastCareerId uint32
 
 func setupTest() {
 	worker = createNewWorker()
 	log.Print("test setup completed")
 }
 
-func TestCreateCertificate(t *testing.T) {
+func TestEverything(t *testing.T) {
+	setupTest()
+	testCreateCertificate(t)
+	testCreateCareer(t)
+	testFinishCareer(t)
+	testValidateOnChain(t)
+}
+
+func testCreateCertificate(t *testing.T) {
 	t.Run("should successfully create the certificate", func(t *testing.T) {
-		err := services.CreateCertificate(worker.ID, 1, carbon.CreateFromDate(2020, 9, 1).Carbon2Time())
+		err := services.CreateCertificate(worker.ID, 1, carbon.CreateFromDate(2021, 4, 11).Carbon2Time())
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
 	})
 }
 
-func TestCreateCareer(t *testing.T) {
+func testCreateCareer(t *testing.T) {
 	t.Run("should successfully create the career", func(t *testing.T) {
 		career := models.WorkerCareer{}
 		career.CompanyID = 1
 		career.StartAt = carbon.CreateFromDate(2020, 3, 1).Carbon2Time()
 		career.EndAt = carbon.CreateFromDate(2022, 4, 1).Carbon2Time()
-		career.HasEnded = 1
+		career.HasEnded = 0
 		career.WorkerID = worker.ID
 
 		err := services.CreateCareer(&career)
 		if err != nil {
 			t.Fatalf(err.Error())
 		}
+		lastCareerId = career.ID
 	})
 }
 
-func TestGetWorkerDetail(t *testing.T) {
+func testFinishCareer(t *testing.T) {
+	t.Run("should finish current unclosed career", func(t *testing.T) {
+		err := services.FinishCareer(lastCareerId, carbon.CreateFromDate(2022, 8, 22).Carbon2Time())
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
+	})
+}
 
-	t.Run("create worker")
-	worker := &models.Worker{}
-	worker.BirthAt = carbon.CreateFromDate(1996, 9, 1).Carbon2Time()
-	worker.GraduatedAt = carbon.CreateFromDate(2018, 7, 1).Carbon2Time()
-	worker.CollegeID = 1
-	worker.WorkerName = "张奉先"
-	worker.SecurityNo = "320103199609013241"
-	services.CreateWorker(worker)
+func testValidateOnChain(t *testing.T) {
+	t.Run("chain data should accord with db", func(t *testing.T) {
+		result, err := services.ValidateOnChain(worker.ID)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+		if result.WorkerSame != consts.Sync_Result_Same {
+			t.Errorf("Sync Result of Worker differs from [same], but %d", result.WorkerSame)
+		}
+		if result.CertificateSame != consts.Sync_Result_Same {
+			t.Errorf("Sync Result of Certificate differs from [same], but %d", result.CertificateSame)
+		}
+		if result.CareerSame != consts.Sync_Result_Same {
+			t.Errorf("Sync Result of Career differs from [same], but %d", result.CareerSame)
+		}
+	})
 
 }
 
