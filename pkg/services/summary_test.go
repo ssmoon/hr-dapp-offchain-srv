@@ -12,7 +12,7 @@ import (
 	"github.com/golang-module/carbon/v2"
 )
 
-func TestCreateWorker(t *testing.T) {
+func TestSummary(t *testing.T) {
 	var newWorkerId uint32
 	newWorkerSecurityNo := randomString(18)
 

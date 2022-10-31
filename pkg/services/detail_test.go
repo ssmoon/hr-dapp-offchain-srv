@@ -18,7 +18,7 @@ func setupTest() {
 	log.Print("test setup completed")
 }
 
-func TestEverything(t *testing.T) {
+func TestDetail(t *testing.T) {
 	setupTest()
 	testCreateCertificate(t)
 	testCreateCareer(t)
