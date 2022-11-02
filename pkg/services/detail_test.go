@@ -7,6 +7,7 @@ import (
 	services "hr-dapp/srv/pkg/services"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/golang-module/carbon/v2"
 )
@@ -59,6 +60,7 @@ func testCreateCareer(t *testing.T) {
 
 func testFinishCareer(t *testing.T) {
 	t.Run("should finish current unclosed career", func(t *testing.T) {
+		time.Sleep(time.Duration(5) * time.Second)
 		err := services.FinishCareer(lastCareerId, carbon.CreateFromDate(2022, 8, 22).Carbon2Time())
 		if err != nil {
 			t.Fatalf(err.Error())
@@ -68,6 +70,7 @@ func testFinishCareer(t *testing.T) {
 
 func testValidateOnChain(t *testing.T) {
 	t.Run("chain data should accord with db", func(t *testing.T) {
+		time.Sleep(time.Duration(5) * time.Second)
 		result, err := services.ValidateOnChain(worker.ID)
 		if err != nil {
 			t.Errorf(err.Error())
@@ -96,5 +99,6 @@ func createNewWorker() *models.Worker {
 	if err != nil {
 		panic(err)
 	}
+	time.Sleep(time.Duration(5) * time.Second)
 	return worker
 }

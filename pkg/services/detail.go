@@ -76,7 +76,7 @@ func FinishCareer(careerId uint32, endAt time.Time) error {
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return fmt.Errorf("career not found with id %d", careerId)
 	}
-	if career.HasEnded == 0 {
+	if career.HasEnded == 1 {
 		return fmt.Errorf("career with id: %d has ended already", careerId)
 	}
 	db.Model(&models.WorkerCareer{}).Where("id = ?", careerId).Updates(map[string]any{"has_ended": 1, "end_at": endAt})
@@ -139,22 +139,22 @@ func ValidateOnChain(workerId uint32) (*vo.ValidateResult, error) {
 
 	//validate career data
 	type careerItem struct {
-		startAt     uint16
-		endAt       uint16
-		hasEnded    bool
-		companyCode string
+		StartAt     uint16
+		EndAt       uint16
+		HasEnded    bool
+		CompanyCode string
 	}
 
 	var careerResults []careerItem
-	db.Raw("Select start_at, end_at, has_ended, company_code from worker_career ta inner join company tb on ta.company_id=tb.id where worker_id=? order by start_at", workerId).Scan(&careerResults)
+	db.Table("worker_career ta").Select("year(start_at) as start_at, year(end_at) as end_at, has_ended, company_code").Joins("inner join company tb on ta.company_id=tb.id").Where("worker_id = ?", workerId).Order("start_at").Scan(&careerResults)
 
 	offChainCareers := make([]contracts.WorkExperienceDefineWorkExperience, len(careerResults))
 	for i, x := range careerResults {
 		item := contracts.WorkExperienceDefineWorkExperience{}
-		item.StartAt = x.startAt
-		item.EndAt = x.endAt
-		item.HasEnded = x.hasEnded
-		item.CompanyCode = conf.ConvertStringToByte32(x.companyCode)
+		item.StartAt = x.StartAt
+		item.EndAt = x.EndAt
+		item.HasEnded = x.HasEnded
+		item.CompanyCode = conf.ConvertStringToByte32(x.CompanyCode)
 		offChainCareers[i] = item
 	}
 	offChainCareerHash := conf.ComputeCareerHash(offChainCareers)
@@ -167,18 +167,18 @@ func ValidateOnChain(workerId uint32) (*vo.ValidateResult, error) {
 
 	//validate certs
 	type certItem struct {
-		acquiredAt uint16
-		certCode   string
+		AcquiredAt uint16
+		CertCode   string
 	}
 
 	var certResults []certItem
-	db.Raw("Select acquired_at,  cert_code from worker_cert ta inner join certificate tb on ta.certificate_id=tb.id where worker_id=1 order by cert_code", workerId).Scan(&certResults)
+	db.Raw("Select year(acquired_at) as acquired_at,  cert_code from worker_cert ta inner join certificate tb on ta.certificate_id=tb.id where worker_id=? order by cert_code", workerId).Scan(&certResults)
 
 	offChainCerts := make([]contracts.CertificateDefineCertificate, len(certResults))
 	for i, x := range certResults {
 		item := contracts.CertificateDefineCertificate{}
-		item.AcquiredAt = x.acquiredAt
-		item.CertCode = conf.ConvertStringToByte32(x.certCode)
+		item.AcquiredAt = x.AcquiredAt
+		item.CertCode = conf.ConvertStringToByte32(x.CertCode)
 		offChainCerts[i] = item
 	}
 	offChainCertHash := conf.ComputeCertHash(offChainCerts)
