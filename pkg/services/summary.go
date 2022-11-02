@@ -26,18 +26,18 @@ func GetAllWorkers() []models.Worker {
 	return workers
 }
 
-func CreateWorker(worker *models.Worker) error {
+func CreateWorker(worker *models.Worker) (*models.Worker, error) {
 	db := conf.Db
 	db.Create(&worker)
 
 	var collegeByCode *models.College
 	result := db.First(&collegeByCode, worker.CollegeID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return fmt.Errorf("college not found with id %d", worker.CollegeID)
+		return nil, fmt.Errorf("college not found with id %d", worker.CollegeID)
 	}
 
 	err := _createOnChainWorker(worker, collegeByCode.CollegeCode)
-	return err
+	return worker, err
 }
 
 func SyncOnChain(workerId uint32) (uint8, error) {
@@ -80,7 +80,7 @@ func SyncOnChain(workerId uint32) (uint8, error) {
 			return consts.Sync_Result_OverrideOffChain, nil
 		}
 	} else {
-		_createOnChainWorker(offChainWorker, college.CollegeCode)
+		//_createOnChainWorker(offChainWorker, college.CollegeCode)
 		return consts.Sync_Result_UploadToChain, nil
 	}
 }

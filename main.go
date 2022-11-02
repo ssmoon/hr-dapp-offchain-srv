@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	conf.InitEnv()
+	conf.InitEnv("")
+	conf.InitContractConfig("")
 	conf.InitDatabase()
 
 	r := gin.Default()

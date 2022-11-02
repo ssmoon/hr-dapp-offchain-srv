@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"hr-dapp/srv/pkg/conf"
 	"hr-dapp/srv/pkg/consts"
 	models "hr-dapp/srv/pkg/models/db"
 	services "hr-dapp/srv/pkg/services"
@@ -14,6 +15,10 @@ var worker *models.Worker
 var lastCareerId uint32
 
 func setupTest() {
+	log.Print("setup method invoked")
+	conf.InitEnv("C:\\projects\\hr-dapp-offchain-srv")
+	conf.InitContractConfig("C:\\projects\\hr-dapp-offchain-srv")
+	conf.InitDatabase()
 	worker = createNewWorker()
 	log.Print("test setup completed")
 }
@@ -87,7 +92,7 @@ func createNewWorker() *models.Worker {
 	worker.CollegeID = 1
 	worker.WorkerName = "秦先海"
 	worker.SecurityNo = randomString(18)
-	err := services.CreateWorker(worker)
+	_, err := services.CreateWorker(worker)
 	if err != nil {
 		panic(err)
 	}

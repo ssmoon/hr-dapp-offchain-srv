@@ -10,7 +10,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.4.3
 	gorm.io/gorm v1.24.0
-	github.com/thoas/go-funk v0.9.2
 )
 
 require (

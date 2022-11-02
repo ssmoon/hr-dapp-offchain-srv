@@ -24,7 +24,7 @@ import (
 type ContractAddress struct {
 	OwnerAddr  string       `json:"ownerAddr"`
 	OwnerKey   string       `json:"ownerKey"`
-	ProxyAddr  ProxyAddress `json:"proxyAddr"`
+	ProxyAddr  ProxyAddress `json:"proxyedAddr"`
 	Network    string       `json:"network"`
 	Updated    string       `json:"updated"`
 	MemberAddr string       `json:"memberAddr"`
@@ -42,9 +42,16 @@ type ProxyAddress struct {
 var contractConfig = &ContractAddress{}
 
 // 初始化方法
-func InitContractConfig() {
+func InitContractConfig(projectBaseDir string) {
 	ex, _ := os.Executable()
-	jsonFile, err := os.ReadFile(filepath.Dir(ex) + "/resource/deployed_contracts_dev.json")
+	if projectBaseDir == "" {
+		projectBaseDir = filepath.Dir(ex)
+	}
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
+	}
+	jsonFile, err := os.ReadFile(projectBaseDir + "/resource/deployed_contracts_" + env + ".json")
 	if err != nil {
 		panic("配置文件未找到")
 	}
