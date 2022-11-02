@@ -42,3 +42,13 @@ func (controller *WorkerDetail) FinishCareer(context *gin.Context) {
 	services.FinishCareer(uint32(workerId), endAt.Carbon2Time())
 	context.Status(http.StatusNoContent)
 }
+
+func (controller *WorkerDetail) ValidateWorker(context *gin.Context) {
+	workerId, _ := strconv.Atoi(context.Query("workerId"))
+	result, err := services.ValidateOnChain(uint32(workerId))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, result)
+}

@@ -27,5 +27,6 @@ func InitializeRoutes(r *gin.Engine) {
 		con := &controllers.WorkerDetail{}
 		career.POST("/new", con.CreateCareer)
 		career.PUT("/:careerId/finish", con.FinishCareer)
+		career.POST("/validate", con.ValidateWorker)
 	}
 }
