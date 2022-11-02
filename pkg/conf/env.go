@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -10,12 +9,10 @@ import (
 
 // 相应设置配置
 type Setting struct {
-	RunMode    string      `yaml:"runMode"`
-	Server     server      `yaml:"server"`
-	Database   database    `yaml:"database"`
-	Redis      redisConf   `yaml:"redis"`
-	Log        logSetting  `yaml:"log"`
-	WxAccounts []wxAccount `yaml:"wx"`
+	RunMode  string     `yaml:"runMode"`
+	Server   server     `yaml:"server"`
+	Database database   `yaml:"database"`
+	Log      logSetting `yaml:"log"`
 }
 
 // 服务配置
@@ -35,32 +32,25 @@ type database struct {
 	Port     int    `yaml:"port"`
 }
 
-type redisConf struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-	Auth string `yaml:"auth"`
-}
-
 type logSetting struct {
 	Path   string `yaml:"path"`
 	Level  string `yaml:"level"`
 	Prefix string `yaml:"prefix"`
 }
 
-type wxAccount struct {
-	AppID  string `yaml:"appId"`
-	Secret string `yaml:"secret"`
-	Token  string `yaml:"token"`
-	AesKey string `yaml:"aesKey"`
-	name   string `yaml:"name"`
-}
-
 var conf = &Setting{}
 
 // 初始化方法
-func InitEnv() {
+func InitEnv(projectBaseDir string) {
 	ex, _ := os.Executable()
-	yamlFile, err := ioutil.ReadFile(filepath.Dir(ex) + "/resource/application_" + os.Getenv("ENV") + ".yml")
+	if projectBaseDir == "" {
+		projectBaseDir = filepath.Dir(ex)
+	}
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
+	}
+	yamlFile, err := os.ReadFile(projectBaseDir + "/resource/application_" + env + ".yml")
 	if err != nil {
 		panic("配置文件未找到")
 	}

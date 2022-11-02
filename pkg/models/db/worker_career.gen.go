@@ -13,11 +13,11 @@ const TableNameWorkerCareer = "worker_career"
 // WorkerCareer mapped from table <worker_career>
 type WorkerCareer struct {
 	ID        uint32    `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	CompanyID int32     `gorm:"column:company_id;not null" json:"companyId"`
+	CompanyID uint32     `gorm:"column:company_id;not null" json:"companyId"`
 	StartAt   time.Time `gorm:"column:start_at;not null" json:"startAt"`
 	EndAt     time.Time `gorm:"column:end_at;not null" json:"endAt"`
-	HasEnded  int32     `gorm:"column:has_ended;not null" json:"hasEnded"`
-	WorkerID  int32     `gorm:"column:worker_id;not null" json:"workerId"`
+	HasEnded  uint32     `gorm:"column:has_ended;not null" json:"hasEnded"`
+	WorkerID  uint32     `gorm:"column:worker_id;not null" json:"workerId"`
 }
 
 // TableName WorkerCareer's table name

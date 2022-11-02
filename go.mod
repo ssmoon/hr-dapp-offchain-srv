@@ -5,6 +5,8 @@ go 1.19
 require (
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/gin-gonic/gin v1.8.1
+	github.com/golang-module/carbon/v2 v2.1.9
+	github.com/miguelmota/go-solidity-sha3 v0.1.1
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.4.3
 	gorm.io/gorm v1.24.0

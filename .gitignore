@@ -24,3 +24,6 @@ target/
 
 resource/application_dev.yml
 resource/application_prod.yml
+
+resource/deployed_contracts_dev.json
+resource/deployed_contracts_prod.json

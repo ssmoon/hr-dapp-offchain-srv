@@ -1,0 +1,14 @@
+{
+    "ownerAddr": "",
+    "ownerKey": "",
+    "proxyedAddr": {
+        "proxy": "",
+        "admin": "",
+        "implementation": ""
+    },
+    "network": "",
+    "updated": "",
+    "chainId": 4321,
+    "memberAddr": "",
+    "memberKey": ""
+}
