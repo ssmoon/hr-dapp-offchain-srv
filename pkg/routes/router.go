@@ -15,7 +15,8 @@ func InitializeRoutes(r *gin.Engine) {
 		con2 := &controllers.WorkerDetail{}
 		worker.POST("/", con1.CreateWorker)
 		worker.GET("/all", con1.GetWorkerSummary)
-		worker.GET("/:workerId", con2.GetWorkerDetail)
+		worker.POST("/validate", con2.ValidateWorker)
+		worker.GET("/:workerId/detail", con2.GetWorkerDetail)
 	}
 	var cert = r.Group("/api/certificate")
 	{
@@ -25,8 +26,7 @@ func InitializeRoutes(r *gin.Engine) {
 	var career = r.Group("/api/career")
 	{
 		con := &controllers.WorkerDetail{}
-		career.POST("/new", con.CreateCareer)
+		career.POST("/", con.CreateCareer)
 		career.PUT("/:careerId/finish", con.FinishCareer)
-		career.POST("/validate", con.ValidateWorker)
 	}
 }
