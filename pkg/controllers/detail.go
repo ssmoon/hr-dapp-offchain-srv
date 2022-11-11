@@ -13,9 +13,26 @@ import (
 type WorkerDetail struct {
 }
 
-func (controller *WorkerDetail) GetWorkerDetail(context *gin.Context) {
+func (controller *WorkerDetail) GetWorker(context *gin.Context) {
 	workerId, _ := strconv.Atoi(context.Query("workerId"))
-	context.JSON(http.StatusOK, services.GetWorkerDetail(uint32(workerId)))
+	result, err := services.GetWorker(uint32(workerId))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, result)
+}
+
+func (controller *WorkerDetail) GetCertByWorkerId(context *gin.Context) {
+	workerId, _ := strconv.Atoi(context.Query("workerId"))
+	result := services.GetCertificateByWorkerId(uint32(workerId))
+	context.JSON(http.StatusOK, result)
+}
+
+func (controller *WorkerDetail) GetCareerByWorkerId(context *gin.Context) {
+	workerId, _ := strconv.Atoi(context.Query("workerId"))
+	result := services.GetCareerByWorkerId(uint32(workerId))
+	context.JSON(http.StatusOK, result)
 }
 
 func (controller *WorkerDetail) CreateCertificate(context *gin.Context) {

@@ -15,23 +15,42 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetWorkerDetail(workerId uint32) vo.WorkerDetail {
+func GetWorker(workerId uint32) (*vo.WorkerItem, error) {
 	db := conf.Db
-	workerDetail := vo.WorkerDetail{}
-	db.First(&workerDetail.General, workerId)
+	var worker vo.WorkerItem
+	result := db.Model(&models.Worker{}).
+		Select("tx.id, worker_name, birth_at, graduated_at, college_id, ty.college_name ").
+		Joins("inner join college ty on ty.id = tx.college_id").
+		Where("tx.id = ?", workerId).
+		Scan(&worker)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fmt.Errorf("worker not found with id %d", workerId)
+	}
+	return &worker, nil
+}
+
+func GetCareerByWorkerId(workerId uint32) *[]vo.WorkerCareer {
+	db := conf.Db
+	var careers []vo.WorkerCareer
 	db.Model(&models.WorkerCareer{}).
 		Select("tx.id, tc.company_code, tc.company_name, tx.startAt, tx.endAt, tx.hasEnded ").
 		Joins("inner join company tc on tc.id = tx.company_id").
 		Where("tx.worker_id = ?", workerId).
 		Order("tx.start_at").
-		Scan(&workerDetail.CareerPeriods)
+		Scan(&careers)
+	return &careers
+}
+
+func GetCertificateByWorkerId(workerId uint32) *[]vo.WorkerCertificate {
+	db := conf.Db
+	var certs []vo.WorkerCertificate
 	db.Model(&models.WorkerCert{}).
 		Select("tx.id, tc.cert_code, tc.cert_name, tx.acquired_at ").
 		Joins("inner join certificate tc on tc.id = tx.certificate_id").
 		Where("tx.worker_id = ?", workerId).
 		Order("tx.acquired_at").
-		Scan(&workerDetail.Certificates)
-	return workerDetail
+		Scan(&certs)
+	return &certs
 }
 
 func CreateCertificate(workerId uint32, certificateId uint32, acquiredAt time.Time) error {
